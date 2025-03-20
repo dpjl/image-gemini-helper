@@ -1,41 +1,64 @@
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import Gallery, { ImageItem } from '@/components/Gallery';
 import DeleteConfirmDialog from '@/components/DeleteConfirmDialog';
 import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-
-// For demo purposes, we're creating placeholder images
-// In a real implementation, these would come from an API
-const generatePlaceholderImages = (count: number, directory: string): ImageItem[] => {
-  return Array.from({ length: count }).map((_, i) => ({
-    id: `${directory}-${i}`,
-    src: `https://picsum.photos/seed/${directory}${i}/400/400`,
-    alt: `Image ${i} from ${directory}`,
-    directory
-  }));
-};
+import { fetchImages, deleteImages } from '@/api/imageApi';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 const Index = () => {
   const { toast } = useToast();
-  const [leftImages, setLeftImages] = useState<ImageItem[]>([]);
-  const [rightImages, setRightImages] = useState<ImageItem[]>([]);
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const queryClient = useQueryClient();
   
-  // Simulate loading images
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLeftImages(generatePlaceholderImages(16, "directory1"));
-      setRightImages(generatePlaceholderImages(12, "directory2"));
-      setIsLoading(false);
-    }, 1000);
-    
-    return () => clearTimeout(timer);
-  }, []);
+  // Fetch data for directory1
+  const { 
+    data: leftImages = [], 
+    isLoading: isLoadingLeft 
+  } = useQuery({
+    queryKey: ['images', 'directory1'],
+    queryFn: () => fetchImages('directory1'),
+  });
+  
+  // Fetch data for directory2
+  const { 
+    data: rightImages = [], 
+    isLoading: isLoadingRight 
+  } = useQuery({
+    queryKey: ['images', 'directory2'],
+    queryFn: () => fetchImages('directory2'),
+  });
+  
+  // Mutation for deleting images
+  const deleteMutation = useMutation({
+    mutationFn: deleteImages,
+    onSuccess: () => {
+      // Show success message
+      toast({
+        title: `${selectedImages.length} ${selectedImages.length === 1 ? 'image' : 'images'} deleted`,
+        description: "The selected images have been removed successfully.",
+      });
+      
+      // Reset selected images and close the dialog
+      setSelectedImages([]);
+      setDeleteDialogOpen(false);
+      
+      // Refetch both image lists to reflect the changes
+      queryClient.invalidateQueries({ queryKey: ['images'] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error deleting images",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive",
+      });
+      setDeleteDialogOpen(false);
+    }
+  });
   
   const handleSelectImage = (id: string) => {
     setSelectedImages(prev => 
@@ -50,19 +73,7 @@ const Index = () => {
   };
   
   const confirmDelete = () => {
-    // Filter out the selected images from both galleries
-    setLeftImages(prev => prev.filter(img => !selectedImages.includes(img.id)));
-    setRightImages(prev => prev.filter(img => !selectedImages.includes(img.id)));
-    
-    // Show success message
-    toast({
-      title: `${selectedImages.length} ${selectedImages.length === 1 ? 'image' : 'images'} deleted`,
-      description: "The selected images have been removed successfully.",
-    });
-    
-    // Reset selected images and close the dialog
-    setSelectedImages([]);
-    setDeleteDialogOpen(false);
+    deleteMutation.mutate(selectedImages);
   };
   
   const containerVariants = {
@@ -118,10 +129,10 @@ const Index = () => {
             variant="destructive"
             size="sm"
             className="gap-2"
-            disabled={selectedImages.length === 0}
+            disabled={selectedImages.length === 0 || deleteMutation.isPending}
           >
             <Trash2 className="h-4 w-4" />
-            Delete Selected
+            {deleteMutation.isPending ? 'Deleting...' : 'Delete Selected'}
           </Button>
         </motion.div>
         
@@ -134,7 +145,7 @@ const Index = () => {
             images={leftImages}
             selectedImages={selectedImages}
             onSelectImage={handleSelectImage}
-            isLoading={isLoading}
+            isLoading={isLoadingLeft}
           />
           
           <Gallery
@@ -142,7 +153,7 @@ const Index = () => {
             images={rightImages}
             selectedImages={selectedImages}
             onSelectImage={handleSelectImage}
-            isLoading={isLoading}
+            isLoading={isLoadingRight}
           />
         </motion.div>
       </motion.div>
