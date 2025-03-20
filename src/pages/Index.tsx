@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import Gallery, { ImageItem } from '@/components/Gallery';
 import DeleteConfirmDialog from '@/components/DeleteConfirmDialog';
 import { Button } from '@/components/ui/button';
-import { Trash2 } from 'lucide-react';
+import { Trash2, FolderSearch } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { fetchImages, deleteImages } from '@/api/imageApi';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -100,11 +100,14 @@ const Index = () => {
         className="max-w-7xl mx-auto"
       >
         <motion.div variants={itemVariants} className="mb-8 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-            Image Gallery Manager
-          </h1>
+          <div className="flex items-center justify-center mb-4">
+            <FolderSearch className="h-10 w-10 text-primary mr-2" />
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+              CFM media browser
+            </h1>
+          </div>
           <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
-            Browse and manage your image collection.
+            Browse and manage images that are only in destination folder
           </p>
         </motion.div>
         
