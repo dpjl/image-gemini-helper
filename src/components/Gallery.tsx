@@ -61,8 +61,8 @@ const Gallery: React.FC<GalleryProps> = ({
     return (
       <div className="flex flex-col h-full">
         <h2 className="text-lg font-medium mb-4">{title}</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {Array.from({ length: 6 }).map((_, i) => (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          {Array.from({ length: 10 }).map((_, i) => (
             <div 
               key={`skeleton-${i}`} 
               className="aspect-square rounded-lg bg-muted animate-pulse"
@@ -89,7 +89,7 @@ const Gallery: React.FC<GalleryProps> = ({
       ) : (
         <div className={cn(
           "grid gap-4 flex-1 content-start",
-          "grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
+          "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
         )}>
           <AnimatePresence>
             {images.map((image, index) => (

@@ -15,22 +15,13 @@ const Index = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const queryClient = useQueryClient();
   
-  // Fetch data for directory1
+  // Fetch data from a single directory
   const { 
-    data: leftImages = [], 
-    isLoading: isLoadingLeft 
+    data: images = [], 
+    isLoading 
   } = useQuery({
     queryKey: ['images', 'directory1'],
     queryFn: () => fetchImages('directory1'),
-  });
-  
-  // Fetch data for directory2
-  const { 
-    data: rightImages = [], 
-    isLoading: isLoadingRight 
-  } = useQuery({
-    queryKey: ['images', 'directory2'],
-    queryFn: () => fetchImages('directory2'),
   });
   
   // Mutation for deleting images
@@ -47,7 +38,7 @@ const Index = () => {
       setSelectedImages([]);
       setDeleteDialogOpen(false);
       
-      // Refetch both image lists to reflect the changes
+      // Refetch the image list to reflect the changes
       queryClient.invalidateQueries({ queryKey: ['images'] });
     },
     onError: (error) => {
@@ -113,7 +104,7 @@ const Index = () => {
             Image Gallery Manager
           </h1>
           <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
-            Browse and manage images from two different directories side by side.
+            Browse and manage your image collection.
           </p>
         </motion.div>
         
@@ -138,22 +129,14 @@ const Index = () => {
         
         <motion.div 
           variants={itemVariants}
-          className="grid grid-cols-1 md:grid-cols-2 gap-8 glass-panel p-6"
+          className="glass-panel p-6"
         >
           <Gallery
-            title="Directory 1"
-            images={leftImages}
+            title="Image Gallery"
+            images={images}
             selectedImages={selectedImages}
             onSelectImage={handleSelectImage}
-            isLoading={isLoadingLeft}
-          />
-          
-          <Gallery
-            title="Directory 2"
-            images={rightImages}
-            selectedImages={selectedImages}
-            onSelectImage={handleSelectImage}
-            isLoading={isLoadingRight}
+            isLoading={isLoading}
           />
         </motion.div>
       </motion.div>
