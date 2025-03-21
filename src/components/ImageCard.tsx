@@ -33,7 +33,7 @@ const ImageCard: React.FC<ImageCardProps> = ({
     video: "aspect-video",
   }[aspectRatio];
   
-  const isVideo = type === "video" || src.match(/\.(mp4|webm|ogg|mov)$/i);
+  const isVideo = type === "video" || alt.match(/\.(mp4|webm|ogg|mov)$/i);
   
   return (
     <TooltipProvider delayDuration={0}>
