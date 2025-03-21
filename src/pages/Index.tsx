@@ -8,6 +8,31 @@ import { useToast } from '@/components/ui/use-toast';
 import { fetchImages, deleteImages } from '@/api/imageApi';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
+// Define container and item animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { 
+    opacity: 1,
+    transition: { 
+      when: "beforeChildren",
+      staggerChildren: 0.1,
+      duration: 0.3
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: { 
+    y: 0, 
+    opacity: 1,
+    transition: {
+      duration: 0.4,
+      ease: [0.22, 1, 0.36, 1]
+    }
+  }
+};
+
 const Index = () => {
   const { toast } = useToast();
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
@@ -65,8 +90,6 @@ const Index = () => {
   const confirmDelete = () => {
     deleteMutation.mutate(selectedImages);
   };
-  
-  // ... keep existing code (animation variants)
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20 py-8 px-4 md:py-12">
