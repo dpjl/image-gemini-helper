@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
 import { 
@@ -13,7 +13,7 @@ import {
   ContextMenuContent,
   ContextMenuItem,
 } from '@/components/ui/context-menu';
-import { Download } from 'lucide-react';
+import { Download, Video } from 'lucide-react';
 
 interface ImageCardProps {
   src: string;
@@ -22,6 +22,7 @@ interface ImageCardProps {
   onSelect: () => void;
   aspectRatio?: "portrait" | "square" | "video";
   type?: "image" | "video";
+  onInView?: () => void;
 }
 
 const ImageCard: React.FC<ImageCardProps> = ({
@@ -30,9 +31,34 @@ const ImageCard: React.FC<ImageCardProps> = ({
   selected,
   onSelect,
   aspectRatio = "square",
-  type = "image"
+  type = "image",
+  onInView
 }) => {
   const [loaded, setLoaded] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  
+  // Detect when the component enters or leaves the viewport
+  useEffect(() => {
+    if (!cardRef.current || !onInView) return;
+    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          onInView();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    
+    observer.observe(cardRef.current);
+    
+    return () => {
+      if (cardRef.current) {
+        observer.unobserve(cardRef.current);
+      }
+    };
+  }, [onInView]);
   
   const aspectRatioClass = {
     portrait: "aspect-[3/4]",
@@ -53,6 +79,18 @@ const ImageCard: React.FC<ImageCardProps> = ({
     document.body.removeChild(a);
   };
   
+  const handleMouseOver = () => {
+    if (isVideo && videoRef.current) {
+      videoRef.current.play().catch(err => console.error('Error playing video:', err));
+    }
+  };
+  
+  const handleMouseOut = () => {
+    if (isVideo && videoRef.current) {
+      videoRef.current.pause();
+    }
+  };
+  
   return (
     <ContextMenu>
       <ContextMenuTrigger>
@@ -60,29 +98,37 @@ const ImageCard: React.FC<ImageCardProps> = ({
           <Tooltip>
             <TooltipTrigger asChild>
               <div 
+                ref={cardRef}
                 className={cn(
-                  "image-card group", 
+                  "image-card group relative", 
                   aspectRatioClass,
                   selected && "selected",
                   !loaded && "animate-pulse bg-muted"
                 )}
                 onClick={onSelect}
+                onMouseOver={handleMouseOver}
+                onMouseOut={handleMouseOut}
               >
                 {isVideo ? (
-                  <video 
-                    src={src}
-                    title={alt}
-                    className={cn(
-                      "w-full h-full object-cover transition-all duration-500",
-                      loaded ? "opacity-100" : "opacity-0"
-                    )}
-                    onLoadedData={() => setLoaded(true)}
-                    muted
-                    loop
-                    playsInline
-                    onMouseOver={(e) => e.currentTarget.play()}
-                    onMouseOut={(e) => e.currentTarget.pause()}
-                  />
+                  <>
+                    <video 
+                      ref={videoRef}
+                      src={src}
+                      title={alt}
+                      className={cn(
+                        "w-full h-full object-cover transition-all duration-500",
+                        loaded ? "opacity-100" : "opacity-0"
+                      )}
+                      onLoadedData={() => setLoaded(true)}
+                      muted
+                      loop
+                      playsInline
+                    />
+                    {/* Video icon overlay */}
+                    <div className="absolute top-2 left-2 z-10 bg-black/70 p-1 rounded-md text-white">
+                      <Video className="h-4 w-4" />
+                    </div>
+                  </>
                 ) : (
                   <img
                     src={src}

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import Gallery, { ImageItem } from '@/components/Gallery';
@@ -30,8 +29,8 @@ const Index = () => {
     onSuccess: () => {
       // Show success message
       toast({
-        title: `${selectedImages.length} ${selectedImages.length === 1 ? 'image' : 'images'} deleted`,
-        description: "The selected images have been removed successfully.",
+        title: `${selectedImages.length} ${selectedImages.length === 1 ? 'media' : 'media files'} deleted`,
+        description: "The selected media files have been removed successfully.",
       });
       
       // Reset selected images and close the dialog
@@ -43,7 +42,7 @@ const Index = () => {
     },
     onError: (error) => {
       toast({
-        title: "Error deleting images",
+        title: "Error deleting media files",
         description: error instanceof Error ? error.message : "An unknown error occurred",
         variant: "destructive",
       });
@@ -67,29 +66,7 @@ const Index = () => {
     deleteMutation.mutate(selectedImages);
   };
   
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { 
-      opacity: 1,
-      transition: { 
-        when: "beforeChildren",
-        staggerChildren: 0.1,
-        duration: 0.3
-      }
-    }
-  };
-  
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: { 
-      y: 0, 
-      opacity: 1,
-      transition: {
-        duration: 0.4,
-        ease: [0.22, 1, 0.36, 1]
-      }
-    }
-  };
+  // ... keep existing code (animation variants)
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20 py-8 px-4 md:py-12">
@@ -107,14 +84,14 @@ const Index = () => {
             </h1>
           </div>
           <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
-            Browse and manage images that are only in destination folder
+            Browse and manage images and videos that are only in destination folder
           </p>
         </motion.div>
         
         <motion.div variants={itemVariants} className="mb-6 flex justify-between items-center">
           <div>
             <span className="text-sm text-muted-foreground">
-              {selectedImages.length} {selectedImages.length === 1 ? 'image' : 'images'} selected
+              {selectedImages.length} {selectedImages.length === 1 ? 'media file' : 'media files'} selected
             </span>
           </div>
           
@@ -135,7 +112,7 @@ const Index = () => {
           className="glass-panel p-6"
         >
           <Gallery
-            title="Image Gallery"
+            title="Media Gallery"
             images={images}
             selectedImages={selectedImages}
             onSelectImage={handleSelectImage}

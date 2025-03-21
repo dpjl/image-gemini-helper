@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import ImageCard from './ImageCard';
@@ -30,11 +29,24 @@ const Gallery: React.FC<GalleryProps> = ({
 }) => {
   const { toast } = useToast();
   const [mounted, setMounted] = useState(false);
+  const [visibleItems, setVisibleItems] = useState<Set<string>>(new Set());
+  
+  // Count videos based on file extension in alt text
+  const videoCount = images.filter(img => img.alt.match(/\.(mp4|webm|ogg|mov)$/i)).length;
+  const imageCount = images.length - videoCount;
   
   useEffect(() => {
     setMounted(true);
     return () => setMounted(false);
   }, []);
+  
+  const handleItemInView = (id: string) => {
+    setVisibleItems(prev => {
+      const newSet = new Set(prev);
+      newSet.add(id);
+      return newSet;
+    });
+  };
   
   const imageVariants = {
     hidden: { opacity: 0, scale: 0.8 },
@@ -76,7 +88,9 @@ const Gallery: React.FC<GalleryProps> = ({
   return (
     <div className="flex flex-col h-full">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-medium">{title}</h2>
+        <h2 className="text-lg font-medium">
+          Media Gallery ({imageCount} images, {videoCount} videos)
+        </h2>
         <div className="text-sm text-muted-foreground">
           {selectedImages.filter(id => images.some(img => img.id === id)).length} selected
         </div>
@@ -84,7 +98,7 @@ const Gallery: React.FC<GalleryProps> = ({
       
       {images.length === 0 ? (
         <div className="flex-1 flex items-center justify-center">
-          <p className="text-muted-foreground">No images found</p>
+          <p className="text-muted-foreground">No media found</p>
         </div>
       ) : (
         <div className={cn(
@@ -108,6 +122,8 @@ const Gallery: React.FC<GalleryProps> = ({
                   selected={selectedImages.includes(image.id)}
                   onSelect={() => onSelectImage(image.id)}
                   aspectRatio={index % 5 === 0 ? "portrait" : index % 4 === 0 ? "video" : "square"}
+                  type={image.alt.match(/\.(mp4|webm|ogg|mov)$/i) ? "video" : "image"}
+                  onInView={() => handleItemInView(image.id)}
                 />
               </motion.div>
             ))}
