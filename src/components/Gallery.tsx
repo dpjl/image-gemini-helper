@@ -10,6 +10,7 @@ export interface ImageItem {
   src: string;
   alt: string;
   directory: string;
+  createdAt?: string; // Date de création ou prise de vue
 }
 
 interface GalleryProps {
@@ -31,7 +32,6 @@ const Gallery: React.FC<GalleryProps> = ({
   const [mounted, setMounted] = useState(false);
   const [visibleItems, setVisibleItems] = useState<Set<string>>(new Set());
   
-  // Count videos based on file extension in alt text
   const videoCount = images.filter(img => img.alt.match(/\.(mp4|webm|ogg|mov)$/i)).length;
   const imageCount = images.length - videoCount;
   
@@ -124,6 +124,7 @@ const Gallery: React.FC<GalleryProps> = ({
                   aspectRatio={index % 5 === 0 ? "portrait" : index % 4 === 0 ? "video" : "square"}
                   type={image.alt.match(/\.(mp4|webm|ogg|mov)$/i) ? "video" : "image"}
                   onInView={() => handleItemInView(image.id)}
+                  createdAt={image.createdAt}
                 />
               </motion.div>
             ))}

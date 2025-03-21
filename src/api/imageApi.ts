@@ -1,4 +1,3 @@
-
 import { ImageItem } from '@/components/Gallery';
 
 // Default to the environment variable if available, otherwise use a relative path
@@ -26,7 +25,22 @@ export async function fetchImages(directory: string): Promise<ImageItem[]> {
     
     const data = await response.json();
     console.log("Received image data:", data);
-    return data;
+    
+    // Si le serveur ne fournit pas de dates, nous pouvons ajouter des dates factices pour la démonstration
+    // Dans une implémentation réelle, ces dates viendraient du serveur après extraction des métadonnées
+    const enhancedData = data.map((item: ImageItem) => {
+      if (!item.createdAt) {
+        // Générer une date aléatoire pour la démo
+        const randomDate = new Date();
+        randomDate.setFullYear(randomDate.getFullYear() - Math.floor(Math.random() * 3));
+        randomDate.setMonth(Math.floor(Math.random() * 12));
+        randomDate.setDate(Math.floor(Math.random() * 28) + 1);
+        return { ...item, createdAt: randomDate.toISOString() };
+      }
+      return item;
+    });
+    
+    return enhancedData as ImageItem[];
   } catch (error) {
     console.error("Error fetching images:", error);
     throw error;

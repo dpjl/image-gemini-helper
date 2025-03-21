@@ -13,7 +13,9 @@ import {
   ContextMenuContent,
   ContextMenuItem,
 } from '@/components/ui/context-menu';
-import { Download, Video } from 'lucide-react';
+import { Download, Video, Calendar } from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 interface ImageCardProps {
   src: string;
@@ -23,6 +25,7 @@ interface ImageCardProps {
   aspectRatio?: "portrait" | "square" | "video";
   type?: "image" | "video";
   onInView?: () => void;
+  createdAt?: string;
 }
 
 const ImageCard: React.FC<ImageCardProps> = ({
@@ -32,7 +35,8 @@ const ImageCard: React.FC<ImageCardProps> = ({
   onSelect,
   aspectRatio = "square",
   type = "image",
-  onInView
+  onInView,
+  createdAt
 }) => {
   const [loaded, setLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -91,6 +95,9 @@ const ImageCard: React.FC<ImageCardProps> = ({
     }
   };
   
+  // Formater la date si disponible
+  const formattedDate = createdAt ? format(new Date(createdAt), 'dd MMM yyyy', { locale: fr }) : null;
+  
   return (
     <ContextMenu>
       <ContextMenuTrigger>
@@ -140,6 +147,15 @@ const ImageCard: React.FC<ImageCardProps> = ({
                     onLoad={() => setLoaded(true)}
                   />
                 )}
+
+                {/* Date creation overlay */}
+                {formattedDate && (
+                  <div className="absolute bottom-2 left-2 z-10 bg-black/70 px-2 py-1 rounded-md text-white text-xs flex items-center">
+                    <Calendar className="h-3 w-3 mr-1" />
+                    {formattedDate}
+                  </div>
+                )}
+
                 <div className="image-overlay" />
                 <div className="image-checkbox">
                   <Checkbox 
